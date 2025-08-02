@@ -20,6 +20,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { NumberTicker } from '@/components/ui/number-ticker';
+import { cn } from '@/lib/utils';
 
 export interface Price {
   open: number;
@@ -61,14 +62,25 @@ export interface StockChartProps {
 }
 
 export function StockChart(props: StockChartProps) {
+  const hasChartData =
+    props.result.historical?.prices &&
+    props.result.historical.prices.length > 0;
+
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible={hasChartData} className="w-full">
       <AccordionItem value="stock-chart" className="border-none">
         <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-sm">
-          {/* Beautiful gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-background/5" />
 
-          <AccordionTrigger className="relative w-full px-6 py-4 hover:no-underline hover:bg-muted/20 transition-all duration-300 rounded-t-2xl group">
+          <AccordionTrigger
+            className={cn(
+              'relative w-full px-6 py-4 hover:no-underline transition-all duration-300 rounded-t-2xl group',
+              hasChartData
+                ? 'hover:bg-muted/20'
+                : '[&>svg]:hidden cursor-default opacity-75',
+            )}
+            disabled={!hasChartData}
+          >
             <div className="flex flex-row items-center gap-3">
               <div className="p-1.5 rounded-full bg-financial-positive/10 group-hover:bg-financial-positive/20 transition-colors">
                 <RiCheckboxCircleFill
@@ -81,7 +93,10 @@ export function StockChart(props: StockChartProps) {
                   Stock Data Retrieved
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {props.ticker} • Live pricing data
+                  {props.ticker} •{' '}
+                  {hasChartData
+                    ? 'Live pricing data'
+                    : 'No chart data available'}
                 </span>
               </div>
             </div>
@@ -89,7 +104,6 @@ export function StockChart(props: StockChartProps) {
 
           <AccordionContent>
             <div className="relative p-6 space-y-6 max-w-[800px]">
-              {/* Subtle background pattern */}
               <div className="absolute inset-0 opacity-5">
                 <div className="h-full w-full bg-[radial-gradient(circle_at_1px_1px,_theme(colors.foreground)_1px,_transparent_0)] bg-[size:20px_20px]" />
               </div>
@@ -168,8 +182,8 @@ function Chart({ data }: ChartProps) {
     <div className="relative">
       {/* Chart container with beautiful styling */}
       <div className="rounded-xl bg-gradient-to-br from-card/50 to-muted/20 p-4 border border-border/20 backdrop-blur-sm">
-        <ResponsiveContainer 
-          width="100%" 
+        <ResponsiveContainer
+          width="100%"
           height={320}
           initialDimension={{ width: 600, height: 320 }}
         >
