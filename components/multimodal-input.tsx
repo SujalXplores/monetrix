@@ -520,13 +520,13 @@ function PureSendButton({
           'dark:shadow-black/20 dark:hover:shadow-black/30',
           'dark:border-primary/30 dark:hover:border-primary/50',
         ],
-        // Disabled state with improved styling
+        // Disabled state with much better visibility
         isDisabled && [
-          'bg-muted/50 border border-border/50 shadow-sm',
+          'bg-muted border border-border shadow-sm',
           'cursor-not-allowed',
-          'dark:bg-muted/30 dark:border-border/40',
-          'hover:bg-muted/50 hover:border-border/50 hover:shadow-sm',
-          'dark:hover:bg-muted/30 dark:hover:border-border/40',
+          'dark:bg-muted/80 dark:border-border/70',
+          'hover:bg-muted hover:border-border hover:shadow-sm',
+          'dark:hover:bg-muted/80 dark:hover:border-border/70',
         ],
       )}
       onClick={(event) => {
@@ -539,7 +539,7 @@ function PureSendButton({
         size={16}
         className={cx(
           'transition-colors duration-200',
-          !isDisabled ? 'text-primary-foreground' : 'text-muted-foreground/60',
+          !isDisabled ? 'text-primary-foreground' : 'text-muted-foreground',
         )}
       />
     </Button>
