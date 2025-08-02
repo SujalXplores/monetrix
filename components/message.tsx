@@ -10,7 +10,7 @@ import { useCopyToClipboard } from 'usehooks-ts';
 import type { Vote } from '@/lib/db/schema';
 import { cn } from '@/lib/utils';
 import { FinancialsTable } from './financials-table';
-import { CopyIcon, PencilEditIcon } from './icons';
+import { CopyIcon, PencilEditIcon, SparklesIcon } from './icons';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { MessageEditor } from './message-editor';
@@ -77,6 +77,11 @@ const PurePreviewMessage = ({
 
             {message.content && mode === 'view' && (
               <div className="flex flex-row gap-2 items-start">
+                {message.role === 'assistant' && (
+                  <div className="flex items-center mt-1">
+                    <SparklesIcon size={16} className="text-yellow-500" />
+                  </div>
+                )}
                 {message.role === 'user' && !isReadonly && (
                   <div className="flex flex-row gap-1">
                     <Tooltip>
