@@ -297,10 +297,7 @@ const PureMultimodalInput = forwardRef<
           {isLoading ? (
             <StopButton stop={stop} setMessages={setMessages} />
           ) : (
-            <SendButton
-              input={input}
-              submitForm={submitForm}
-            />
+            <SendButton input={input} submitForm={submitForm} />
           )}
         </div>
       </div>

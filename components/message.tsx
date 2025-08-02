@@ -243,7 +243,10 @@ const PurePreviewMessage = ({
             {message.experimental_attachments && (
               <div className="flex flex-row justify-end gap-2">
                 {message.experimental_attachments.map((attachment) => (
-                  <div key={attachment.url} className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  <div
+                    key={attachment.url}
+                    className="flex flex-col gap-1 text-xs text-muted-foreground"
+                  >
                     <div className="px-2 py-1 bg-muted rounded-md">
                       📎 {attachment.name || 'Attachment'}
                     </div>

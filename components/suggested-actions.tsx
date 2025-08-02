@@ -40,11 +40,11 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
       action: "How has Nvidia's price changed year to date?",
     },
     {
-      title: 'Show me 5 stocks with',
-      label: 'revenue > 100B and net income > 10B',
-      mobileTitle: 'Find stocks',
-      mobileLabel: 'revenue >100B, net income >10B',
-      action: 'Show me 5 stocks with revenue > 100B and net income > 10B',
+      title: 'Compare the financial metrics',
+      label: 'of Microsoft and Google',
+      mobileTitle: 'Compare metrics',
+      mobileLabel: 'MSFT vs GOOGL',
+      action: 'Compare the financial metrics of Microsoft and Google',
     },
   ];
 
