@@ -256,7 +256,7 @@ const config: Config = {
         'slide-up': 'slide-up 0.5s ease-out',
         'price-up': 'price-up 0.6s ease-in-out',
         'price-down': 'price-down 0.6s ease-in-out',
-        'shine': 'shine 5s linear infinite',
+        shine: 'shine 5s linear infinite',
       },
     },
   },

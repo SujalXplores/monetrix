@@ -236,11 +236,7 @@ export const ThinkingMessage = () => {
     >
       <div className="flex items-center gap-2">
         <div className="size-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent text-[#9FA2A5] align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-        <ShinyText 
-          text="Researching" 
-          className="text-sm" 
-          speed={3}
-        />
+        <ShinyText text="Researching" className="text-sm" speed={3} />
       </div>
     </motion.div>
   );
@@ -273,11 +269,7 @@ export const LoadingMessage = ({
             {loadingMessages.map((message) => (
               <div key={message} className="flex items-center gap-2">
                 <div className="size-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent text-[#9FA2A5] align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                <ShinyText 
-                  text={message} 
-                  className="text-sm" 
-                  speed={3}
-                />
+                <ShinyText text={message} className="text-sm" speed={3} />
               </div>
             ))}
           </div>
