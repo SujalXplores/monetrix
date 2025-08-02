@@ -243,13 +243,10 @@ const config: Config = {
         },
         shine: {
           '0%': {
-            backgroundPosition: '0% 50%',
-          },
-          '50%': {
-            backgroundPosition: '100% 50%',
+            backgroundPosition: '100%',
           },
           '100%': {
-            backgroundPosition: '0% 50%',
+            backgroundPosition: '-100%',
           },
         },
       },
@@ -259,6 +256,7 @@ const config: Config = {
         'slide-up': 'slide-up 0.5s ease-out',
         'price-up': 'price-up 0.6s ease-in-out',
         'price-down': 'price-down 0.6s ease-in-out',
+        'shine': 'shine 5s linear infinite',
       },
     },
   },
