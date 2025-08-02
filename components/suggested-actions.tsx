@@ -23,7 +23,8 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
       label: 'a balanced investment portfolio',
       mobileTitle: 'Build portfolio',
       mobileLabel: 'investment strategy',
-      action: 'Explain how to build a balanced investment portfolio for a beginner, including asset allocation, risk management, and diversification strategies with practical examples',
+      action:
+        'Explain how to build a balanced investment portfolio for a beginner, including asset allocation, risk management, and diversification strategies with practical examples',
     },
     {
       title: 'What is the latest news',
