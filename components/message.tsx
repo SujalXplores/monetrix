@@ -14,7 +14,6 @@ import { CopyIcon, PencilEditIcon, SparklesIcon } from './icons';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { MessageEditor } from './message-editor';
-import { PreviewAttachment } from './preview-attachment';
 import { StockScreenerTable } from './stock-screener-table';
 import { Button } from './ui/button';
 import { News } from './ui/news';
@@ -244,10 +243,11 @@ const PurePreviewMessage = ({
             {message.experimental_attachments && (
               <div className="flex flex-row justify-end gap-2">
                 {message.experimental_attachments.map((attachment) => (
-                  <PreviewAttachment
-                    key={attachment.url}
-                    attachment={attachment}
-                  />
+                  <div key={attachment.url} className="flex flex-col gap-1 text-xs text-muted-foreground">
+                    <div className="px-2 py-1 bg-muted rounded-md">
+                      📎 {attachment.name || 'Attachment'}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

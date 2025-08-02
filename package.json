@@ -40,7 +40,6 @@
     "@radix-ui/react-slot": "1.2.3",
     "@radix-ui/react-tooltip": "1.2.7",
     "@remixicon/react": "4.6.0",
-    "@vercel/blob": "0.24.1",
     "@vercel/otel": "1.13.0",
     "@vercel/postgres": "0.10.0",
     "ai": "4.0.20",

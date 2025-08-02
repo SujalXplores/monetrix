@@ -10,7 +10,6 @@ import cx from 'classnames';
 import equal from 'fast-deep-equal';
 import type React from 'react';
 import {
-  type ChangeEvent,
   type Dispatch,
   forwardRef,
   memo,
@@ -26,8 +25,7 @@ import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 import type { InputFocusControls } from '@/hooks/use-input-focus';
 import { useQueryLoading } from '@/hooks/use-query-loading';
 import { sanitizeUIMessages } from '@/lib/utils';
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
-import { PreviewAttachment } from './preview-attachment';
+import { ArrowUpIcon, StopIcon } from './icons';
 import { SuggestedActions } from './suggested-actions';
 import { TickerSuggestions } from './ticker-suggestions';
 import { Button } from './ui/button';
@@ -164,9 +162,6 @@ const PureMultimodalInput = forwardRef<
     }
   };
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
-
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
 
@@ -188,59 +183,6 @@ const PureMultimodalInput = forwardRef<
     width,
     chatId,
   ]);
-
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('/api/files/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const { url, pathname, contentType } = data;
-
-        return {
-          url,
-          name: pathname,
-          contentType: contentType,
-        };
-      }
-      const { error } = await response.json();
-      toast.error(error);
-    } catch (_error) {
-      toast.error('Failed to upload file, please try again!');
-    }
-  };
-
-  const handleFileChange = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(event.target.files || []);
-
-      setUploadQueue(files.map((file) => file.name));
-
-      try {
-        const uploadPromises = files.map((file) => uploadFile(file));
-        const uploadedAttachments = await Promise.all(uploadPromises);
-        const successfullyUploadedAttachments = uploadedAttachments.filter(
-          (attachment) => attachment !== undefined,
-        );
-
-        setAttachments((currentAttachments) => [
-          ...currentAttachments,
-          ...successfullyUploadedAttachments,
-        ]);
-      } catch (error) {
-        console.error('Error uploading files!', error);
-      } finally {
-        setUploadQueue([]);
-      }
-    },
-    [setAttachments],
-  );
 
   const [showTickerSuggestions, setShowTickerSuggestions] = useState(false);
   const [tickerFilter, setTickerFilter] = useState('');
@@ -302,39 +244,8 @@ const PureMultimodalInput = forwardRef<
 
   return (
     <div className="relative w-full flex flex-col gap-4">
-      {messages.length === 0 &&
-        attachments.length === 0 &&
-        uploadQueue.length === 0 && (
-          <SuggestedActions append={append} chatId={chatId} />
-        )}
-
-      <input
-        type="file"
-        className="fixed -top-4 -left-4 size-0.5 opacity-0 pointer-events-none"
-        ref={fileInputRef}
-        multiple
-        onChange={handleFileChange}
-        tabIndex={-1}
-      />
-
-      {(attachments.length > 0 || uploadQueue.length > 0) && (
-        <div className="flex flex-row gap-3 overflow-x-scroll items-end pb-2">
-          {attachments.map((attachment) => (
-            <PreviewAttachment key={attachment.url} attachment={attachment} />
-          ))}
-
-          {uploadQueue.map((filename) => (
-            <PreviewAttachment
-              key={filename}
-              attachment={{
-                url: '',
-                name: filename,
-                contentType: '',
-              }}
-              isUploading={true}
-            />
-          ))}
-        </div>
+      {messages.length === 0 && attachments.length === 0 && (
+        <SuggestedActions append={append} chatId={chatId} />
       )}
 
       {showTickerSuggestions && (
@@ -382,13 +293,6 @@ const PureMultimodalInput = forwardRef<
           autoFocus
         />
 
-        <div className="absolute bottom-2 left-2 flex flex-row justify-start">
-          <AttachmentsButton
-            fileInputRef={fileInputRef}
-            isLoading={isLoading}
-          />
-        </div>
-
         <div className="absolute bottom-2 right-2 flex flex-row justify-end">
           {isLoading ? (
             <StopButton stop={stop} setMessages={setMessages} />
@@ -396,7 +300,6 @@ const PureMultimodalInput = forwardRef<
             <SendButton
               input={input}
               submitForm={submitForm}
-              uploadQueue={uploadQueue}
             />
           )}
         </div>
@@ -415,44 +318,6 @@ export const MultimodalInput = memo(
     return true;
   },
 );
-
-function PureAttachmentsButton({
-  fileInputRef,
-  isLoading,
-}: {
-  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  isLoading: boolean;
-}) {
-  return (
-    <Button
-      className={cx(
-        'rounded-xl p-2.5 h-10 w-10',
-        'bg-background/90 hover:bg-background border border-border/80',
-        'hover:border-border hover:shadow-md',
-        'transition-all duration-200 ease-out',
-        'backdrop-blur-md',
-        // Dark mode with enhanced contrast
-        'dark:bg-background/70 dark:hover:bg-background/90',
-        'dark:border-border/70 dark:hover:border-border',
-        'dark:hover:shadow-black/25',
-        // Focus state
-        'focus-visible:ring-2 focus-visible:ring-primary/30',
-        // Disabled state
-        'disabled:opacity-50 disabled:cursor-not-allowed',
-      )}
-      onClick={(event) => {
-        event.preventDefault();
-        fileInputRef.current?.click();
-      }}
-      disabled={isLoading}
-      variant="ghost"
-    >
-      <PaperclipIcon size={16} className="text-muted-foreground" />
-    </Button>
-  );
-}
-
-const AttachmentsButton = memo(PureAttachmentsButton);
 
 function PureStopButton({
   stop,
@@ -495,13 +360,11 @@ const StopButton = memo(PureStopButton);
 function PureSendButton({
   submitForm,
   input,
-  uploadQueue,
 }: {
   submitForm: () => void;
   input: string;
-  uploadQueue: Array<string>;
 }) {
-  const isDisabled = input.length === 0 || uploadQueue.length > 0;
+  const isDisabled = input.length === 0;
 
   return (
     <Button
@@ -547,8 +410,6 @@ function PureSendButton({
 }
 
 const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
-  if (prevProps.uploadQueue.length !== nextProps.uploadQueue.length)
-    return false;
   if (prevProps.input !== nextProps.input) return false;
   return true;
 });
