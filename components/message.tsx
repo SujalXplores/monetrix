@@ -22,16 +22,17 @@ import ShinyText from './ui/shiny-text';
 import { StockChart } from './ui/stock-chart';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
-const PurePreviewMessage = ({
-  chatId,
-  message,
-  vote,
-  isLoading,
-  setMessages,
-  reload,
-  isReadonly,
-  focusInput,
-}: {
+const TOOL_NAMES = {
+  GET_STOCK_PRICES: 'getStockPrices',
+  GET_NEWS: 'getNews',
+  GET_INCOME_STATEMENTS: 'getIncomeStatements',
+  GET_BALANCE_SHEETS: 'getBalanceSheets',
+  GET_CASH_FLOW_STATEMENTS: 'getCashFlowStatements',
+  GET_FINANCIAL_METRICS: 'getFinancialMetrics',
+  SEARCH_STOCKS_BY_FILTERS: 'searchStocksByFilters',
+} as const;
+
+interface PreviewMessageProps {
   chatId: string;
   message: Message;
   vote: Vote | undefined;
@@ -44,9 +45,184 @@ const PurePreviewMessage = ({
   ) => Promise<string | null | undefined>;
   isReadonly: boolean;
   focusInput: () => void;
-}) => {
+}
+
+/**
+ * @description Renders the appropriate component based on the tool name and result
+ * @param toolName - The name of the tool that was invoked
+ * @param result - The result data from the tool invocation
+ * @returns The rendered tool result component
+ */
+const renderToolResult = (toolName: string, result: any) => {
+  switch (toolName) {
+    case TOOL_NAMES.GET_STOCK_PRICES:
+      return <StockChart ticker={result.ticker} result={result} />;
+    case TOOL_NAMES.GET_NEWS:
+      return <News data={result} />;
+    case TOOL_NAMES.GET_INCOME_STATEMENTS:
+      return (
+        <FinancialsTable
+          data={result.income_statements}
+          title="Income Statements"
+        />
+      );
+    case TOOL_NAMES.GET_BALANCE_SHEETS:
+      return (
+        <FinancialsTable data={result.balance_sheets} title="Balance Sheets" />
+      );
+    case TOOL_NAMES.GET_CASH_FLOW_STATEMENTS:
+      return (
+        <FinancialsTable
+          data={result.cash_flow_statements}
+          title="Cash Flow Statements"
+        />
+      );
+    case TOOL_NAMES.GET_FINANCIAL_METRICS:
+      return (
+        <FinancialsTable
+          data={result.financial_metrics}
+          title="Financial Metrics"
+        />
+      );
+    case TOOL_NAMES.SEARCH_STOCKS_BY_FILTERS:
+      return <StockScreenerTable data={result.search_results} />;
+    default:
+      return <div />;
+  }
+};
+
+/**
+ * Props for the UserActionButtons component
+ */
+interface UserActionButtonsProps {
+  onEdit: () => void;
+  onCopy: () => void;
+}
+
+/**
+ * Action buttons for user messages (edit and copy)
+ */
+const UserActionButtons = ({ onEdit, onCopy }: UserActionButtonsProps) => (
+  <div className="flex flex-row gap-1">
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          className="px-2 h-fit rounded-full text-muted-foreground opacity-0 group-hover/message:opacity-100"
+          onClick={onEdit}
+        >
+          <PencilEditIcon />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Edit message</TooltipContent>
+    </Tooltip>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          className="px-2 h-fit rounded-full text-muted-foreground opacity-0 group-hover/message:opacity-100"
+          onClick={onCopy}
+        >
+          <CopyIcon />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Copy message</TooltipContent>
+    </Tooltip>
+  </div>
+);
+
+interface MessageContentProps {
+  message: Message;
+  mode: 'view' | 'edit';
+  isReadonly: boolean;
+  onEdit: () => void;
+  onCopy: () => void;
+  setMode: React.Dispatch<React.SetStateAction<'view' | 'edit'>>;
+  setMessages: (
+    messages: Message[] | ((messages: Message[]) => Message[]),
+  ) => void;
+  reload: (
+    chatRequestOptions?: ChatRequestOptions,
+  ) => Promise<string | null | undefined>;
+  focusInput: () => void;
+}
+
+/**
+ * Renders message content based on current mode (view/edit)
+ */
+const MessageContent = ({
+  message,
+  mode,
+  isReadonly,
+  onEdit,
+  onCopy,
+  setMode,
+  setMessages,
+  reload,
+  focusInput,
+}: MessageContentProps) => {
+  if (!message.content) return null;
+
+  if (mode === 'edit') {
+    return (
+      <div className="flex flex-row gap-2 items-start">
+        <div className="size-8" />
+        <MessageEditor
+          key={message.id}
+          message={message}
+          setMode={setMode}
+          setMessages={setMessages}
+          reload={reload}
+          focusInput={focusInput}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-row gap-2 items-start">
+      {message.role === 'assistant' && (
+        <div className="flex items-center mt-1">
+          <SparklesIcon size={16} className="text-yellow-500" />
+        </div>
+      )}
+      {message.role === 'user' && !isReadonly && (
+        <UserActionButtons onEdit={onEdit} onCopy={onCopy} />
+      )}
+      <div
+        className={cn('flex flex-col gap-4', {
+          'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
+            message.role === 'user',
+        })}
+      >
+        <Markdown>{message.content as string}</Markdown>
+      </div>
+    </div>
+  );
+};
+
+const PurePreviewMessage = ({
+  chatId,
+  message,
+  vote,
+  isLoading,
+  setMessages,
+  reload,
+  isReadonly,
+  focusInput,
+}: PreviewMessageProps) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [_, copyToClipboard] = useCopyToClipboard();
+
+  const handleEdit = () => {
+    setMode('edit');
+  };
+
+  const handleCopy = async () => {
+    await copyToClipboard(message.content as string);
+    toast.success('Copied to clipboard!');
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -76,72 +252,17 @@ const PurePreviewMessage = ({
               </div>
             )}
 
-            {message.content && mode === 'view' && (
-              <div className="flex flex-row gap-2 items-start">
-                {message.role === 'assistant' && (
-                  <div className="flex items-center mt-1">
-                    <SparklesIcon size={16} className="text-yellow-500" />
-                  </div>
-                )}
-                {message.role === 'user' && !isReadonly && (
-                  <div className="flex flex-row gap-1">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="px-2 h-fit rounded-full text-muted-foreground opacity-0 group-hover/message:opacity-100"
-                          onClick={() => {
-                            setMode('edit');
-                          }}
-                        >
-                          <PencilEditIcon />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Edit message</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="px-2 h-fit rounded-full text-muted-foreground opacity-0 group-hover/message:opacity-100"
-                          onClick={async () => {
-                            await copyToClipboard(message.content as string);
-                            toast.success('Copied to clipboard!');
-                          }}
-                        >
-                          <CopyIcon />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy message</TooltipContent>
-                    </Tooltip>
-                  </div>
-                )}
-
-                <div
-                  className={cn('flex flex-col gap-4', {
-                    'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
-                      message.role === 'user',
-                  })}
-                >
-                  <Markdown>{message.content as string}</Markdown>
-                </div>
-              </div>
-            )}
-
-            {message.content && mode === 'edit' && (
-              <div className="flex flex-row gap-2 items-start">
-                <div className="size-8" />
-
-                <MessageEditor
-                  key={message.id}
-                  message={message}
-                  setMode={setMode}
-                  setMessages={setMessages}
-                  reload={reload}
-                  focusInput={focusInput}
-                />
-              </div>
-            )}
+            <MessageContent
+              message={message}
+              mode={mode}
+              isReadonly={isReadonly}
+              onEdit={handleEdit}
+              onCopy={handleCopy}
+              setMode={setMode}
+              setMessages={setMessages}
+              reload={reload}
+              focusInput={focusInput}
+            />
 
             {message.toolInvocations && message.toolInvocations.length > 0 && (
               <div className="flex flex-col gap-4">
@@ -150,38 +271,9 @@ const PurePreviewMessage = ({
 
                   if (state === 'result') {
                     const { result } = toolInvocation;
-
                     return (
                       <div key={toolCallId}>
-                        {toolName === 'getStockPrices' ? (
-                          <StockChart ticker={result.ticker} result={result} />
-                        ) : toolName === 'getNews' ? (
-                          <News data={result} />
-                        ) : toolName === 'getIncomeStatements' ? (
-                          <FinancialsTable
-                            data={result.income_statements}
-                            title="Income Statements"
-                          />
-                        ) : toolName === 'getBalanceSheets' ? (
-                          <FinancialsTable
-                            data={result.balance_sheets}
-                            title="Balance Sheets"
-                          />
-                        ) : toolName === 'getCashFlowStatements' ? (
-                          <FinancialsTable
-                            data={result.cash_flow_statements}
-                            title="Cash Flow Statements"
-                          />
-                        ) : toolName === 'getFinancialMetrics' ? (
-                          <FinancialsTable
-                            data={result.financial_metrics}
-                            title="Financial Metrics"
-                          />
-                        ) : toolName === 'searchStocksByFilters' ? (
-                          <StockScreenerTable data={result.search_results} />
-                        ) : (
-                          <div />
-                        )}
+                        {renderToolResult(toolName, result)}
                       </div>
                     );
                   }
@@ -225,14 +317,12 @@ export const PreviewMessage = memo(
 );
 
 export const ThinkingMessage = () => {
-  const role = 'assistant';
-
   return (
     <motion.div
       className="w-full mx-auto max-w-3xl px-4"
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1, transition: { delay: 1 } }}
-      data-role={role}
+      data-role="assistant"
     >
       <div className="flex items-center gap-2">
         <div className="size-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent text-[#9FA2A5] align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
@@ -247,14 +337,12 @@ export const LoadingMessage = ({
 }: {
   loadingMessages: string[];
 }) => {
-  const role = 'assistant';
-
   return (
     <motion.div
-      className="w-full mx-auto max-w-3xl px-4 group/message "
+      className="w-full mx-auto max-w-3xl px-4 group/message"
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1, transition: { delay: 1 } }}
-      data-role={role}
+      data-role="assistant"
     >
       <div
         className={cx(
