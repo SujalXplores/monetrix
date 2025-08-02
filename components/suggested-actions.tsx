@@ -19,11 +19,11 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
 
   const suggestedActions = [
     {
-      title: 'What is the current price',
-      label: 'of Apple?',
-      mobileTitle: 'Current price',
-      mobileLabel: 'of AAPL today',
-      action: 'What is the current price of Apple?',
+      title: 'Explain how to build',
+      label: 'a balanced investment portfolio',
+      mobileTitle: 'Build portfolio',
+      mobileLabel: 'investment strategy',
+      action: 'Explain how to build a balanced investment portfolio for a beginner, including asset allocation, risk management, and diversification strategies with practical examples',
     },
     {
       title: 'What is the latest news',
