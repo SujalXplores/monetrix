@@ -212,7 +212,7 @@ export function ApiKeysModal({
           <Button
             onClick={validateAndSaveKeys}
             disabled={isLoading}
-            variant="shimmer"
+            variant="default"
           >
             {isLoading ? 'Saving...' : 'Save'}
           </Button>
