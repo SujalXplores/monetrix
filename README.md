@@ -3,7 +3,7 @@
 # 💬 MONETRIX
 ### *AI Financial Intelligence That Actually Makes Sense*
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-monetrix.app-blue?style=for-the-badge&logo=vercel)](https://monetrix.app)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-monetrix.app-blue?style=for-the-badge&logo=vercel)](https://monetrix-sage.vercel.app)
 [![GitHub Stars](https://img.shields.io/github/stars/SujalXplores/monetrix?style=for-the-badge&logo=github)](https://github.com/SujalXplores/monetrix)
 
 **Chat naturally about stocks • Get instant analysis • Learn as you go**
@@ -127,7 +127,7 @@ AI: A balance sheet shows what a company owns vs owes:
 
 **Making financial intelligence accessible to everyone, one conversation at a time**
 
-[![Try Now](https://img.shields.io/badge/🚀_Try_MONETRIX_Now-monetrix.app-blue?style=for-the-badge&logo=vercel)](https://monetrix.app)
+[![Try Now](https://img.shields.io/badge/🚀_Try_MONETRIX_Now-monetrix.app-blue?style=for-the-badge&logo=vercel)](https://monetrix-sage.vercel.app)
 
 ---
 
